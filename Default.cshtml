@@ -1,0 +1,48 @@
+﻿@{
+    Layout = "~/_SiteLayout.cshtml";
+    Page.Title = "Home Page";
+}
+
+@{
+    if (IsPost)
+    {
+        string date1 = Request["date1"];
+        string date2 = Request["date2"];
+
+        <p>@date1</p>
+        <p>@date2</p>
+
+        var db = Database.OpenConnectionString("Data Source=SENOTHE-PC;Initial Catalog=eurusd;uid=sa;pwd=saadmin", "System.Data.SqlClient");
+        var selectQueryString = "SELECT * FROM Eurusd_2012_daily WHERE date BETWEEN '" + date1 + "' AND '" + date2 + "'";
+        var dbdata = db.Query(selectQueryString);
+
+
+
+        List<DateTime> dates = new List<DateTime>();
+        List<float> popens = new List<float>();
+
+        foreach (var row in dbdata)
+        {
+            dates.Add(row.date);
+            popens.Add((float)row.popen);
+        }
+
+        Chart myChart = new Chart(width: 600, height: 400);
+        myChart.SetYAxis("Rate", 1.1, 1.5);
+        myChart.AddTitle("EURUSD daily from " + date1 + " to " + date2)
+   .AddSeries(chartType: "Line", xValue: dates, yValues: popens)
+   .Write();
+
+
+    }
+    else
+    {
+        <form method="post">
+            <span>date1</span>
+            <input type="date" name="date1" />
+            <span>date2</span>
+            <input type="date" name="date2" />
+            <input type="submit" value="ok" />
+        </form>
+    }
+}
